@@ -404,7 +404,7 @@ class ProductServiceTest {
     class TitleTest {
 
         @Test
-        void testTitleEquivalencePartitionTitle() {
+        void testTitle_3_ok() {
             // válido (3 chars)
             Product ok = productSample(1L, "Nes", null, null, 1, 1, null, BigDecimal.TEN, ProductStatus.IN_STOCK, null, Instant.now());
 
@@ -412,12 +412,24 @@ class ProductServiceTest {
             assertTrue(vOk.isEmpty());
             when(productRepository.save(ok)).thenReturn(ok);
             assertEquals(ok, productService.save(ok));
+        }
 
+        @Test
+        void testTitle_3_menor_invalido() {
             // inválido (< 3 chars)
             Product bad = productSample(1L, "NE", null, null, 1, 1, null, BigDecimal.TEN, ProductStatus.IN_STOCK, null, Instant.now());
 
             Set<ConstraintViolation<Product>> vBad = validator().validate(bad);
             assertEquals("title", vBad.iterator().next().getPropertyPath().toString());
+        }
+
+        @Test
+        void testTitle_3_null_invalido() {
+            // title Null
+            Product p = productSample(1L, null, null, null, 1, 1, null, BigDecimal.TEN, ProductStatus.IN_STOCK, null, Instant.now());
+            var v = validator().validate(p);
+            assertFalse(v.isEmpty(), "title é obrigatório (@NotNull)");
+            assertTrue(v.stream().anyMatch(e -> e.getPropertyPath().toString().equals("title")));
         }
     }
 
